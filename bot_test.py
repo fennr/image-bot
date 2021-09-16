@@ -1,28 +1,27 @@
 """"
-Основной файл бота
+Copyright © Krypton 2021 - https://github.com/kkrypt0nn
+Description:
+This is a template to create your own discord bot in python.
+
+Version: 3.0
 """
 
+import json
 import os
 import platform
 import random
 import sys
 
 import discord
-import yaml
-from discord.ext import commands, tasks
+from discord.ext import tasks
 from discord.ext.commands import Bot
-from discord_slash import SlashCommand, SlashContext  # Importing the newly installed library.
+from discord_slash import SlashCommand, SlashContext
 
-if not os.path.isfile("config.yaml"):
-    sys.exit("'config.yaml' not found! Please add it and try again.")
+if not os.path.isfile("config.json"):
+    sys.exit("'config.json' not found! Please add it and try again.")
 else:
-    with open("config.yaml") as file:
-        config = yaml.load(file, Loader=yaml.FullLoader)
-
-
-TOKEN = config['app_token']
-APP_ID = config['app_id']
-os.environ['TZ'] = 'Europe/Moscow'
+    with open("config.json") as file:
+        config = json.load(file)
 
 """	
 Setup bot intents (events restrictions)
@@ -54,12 +53,11 @@ intents.presences = True
 intents.members = True
 """
 
-
 intents = discord.Intents.default()
-intents.members = True
 
 bot = Bot(command_prefix=config["bot_prefix"], intents=intents)
 slash = SlashCommand(bot, sync_commands=True)
+
 
 # The code in this even is executed when the bot is ready
 @bot.event
@@ -68,7 +66,6 @@ async def on_ready():
     print(f"Discord.py API version: {discord.__version__}")
     print(f"Python version: {platform.python_version()}")
     print(f"Running on: {platform.system()} {platform.release()} ({os.name})")
-    # print(f"All servers: {bot.guilds}")
     print("-------------------")
     status_task.start()
 
@@ -76,9 +73,12 @@ async def on_ready():
 # Setup the game status task of the bot
 @tasks.loop(minutes=1.0)
 async def status_task():
-    statuses = ["ARAM", f"{config['bot_prefix']}help", "квикосы"]
+    statuses = ["with you!", "with Krypton!", f"{config['bot_prefix']}help", "with humans!"]
     await bot.change_presence(activity=discord.Game(random.choice(statuses)))
 
+
+# Removes the default help command of discord.py to be able to create our custom help command.
+bot.remove_command("help")
 
 if __name__ == "__main__":
     for file in os.listdir("./cogs"):
@@ -90,15 +90,6 @@ if __name__ == "__main__":
             except Exception as e:
                 exception = f"{type(e).__name__}: {e}"
                 print(f"Failed to load extension {extension}\n{exception}")
-
-
-# The code in this event is executed every time someone sends a message, with or without the prefix
-@bot.event
-async def on_message(message):
-    # Ignores if a command is being executed by a bot or by the bot itself
-    if message.author == bot.user or message.author.bot:
-        return
-    await bot.process_commands(message)
 
 
 # The code in this event is executed every time someone sends a message, with or without the prefix
@@ -127,5 +118,4 @@ async def on_command_error(context, error):
 
 
 # Run the bot with the token
-
-bot.run(TOKEN)
+bot.run(config["token"])
