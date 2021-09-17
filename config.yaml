@@ -1,8 +1,18 @@
-bot_prefix: "!"
-app_token: "NjYxNDQzNjkyNDQ3NjYyMTAy.XgrfcQ.1hW0jbw6XusQ-4DUIQUkayr5WG4"
-app_id: "661443692447662102"
+bot_prefix: "!"                                                          #Префикс для команд
+app_token: "NjYxNDQzNjkyNDQ3NjYyMTAy.XgrfcQ.1hW0jbw6XusQ-4DUIQUkayr5WG4" #Токен дискорд бота
+app_id: "661443692447662102"                                             #ID дискорд бота
+yadisk: "AQAAAAAH6P4XAAdgagBgC6jWCkUTm5ztpED6YFo"                        #Токен яндекс приложения
+yadisk_id: "6b6a2db71adf4f0a837cbcc3d945fa5b"                            #ID яндекс приложения
+yadisk_pass: "092183e4bb054cfcb54c201ae644e6f3"                          #Пароль яндекс приложения
+channel: "fen-test"                                                      #Канал на дискорд сервере для публикаций
+root: "/test/img"                                                        #Основная папка на ЯД с картинками
+trash: "/test/remove"                                                    #Папка Корзина
+count: 2                                                                 #Количество публикаций за раз
+time:                                                                    #Время публикаций, указывается любое количество
+  - "21:36"
+  - "13:58"
+  - "13:59"
 owner: 196583204164075520
-  - 123456789
 main_color: 0xD75BF4
 error: 0xE02B2B
 success: 0x42F56C

@@ -5,24 +5,20 @@
 import os
 import platform
 import random
-import sys
 
 import discord
-import yaml
 from discord.ext import commands, tasks
 from discord.ext.commands import Bot
 from discord_slash import SlashCommand, SlashContext  # Importing the newly installed library.
 
-if not os.path.isfile("config.yaml"):
-    sys.exit("'config.yaml' not found! Please add it and try again.")
-else:
-    with open("config.yaml") as file:
-        config = yaml.load(file, Loader=yaml.FullLoader)
+from scripts.config import read_config
+from scripts.test import ya_test
 
+config = read_config()
 
 TOKEN = config['app_token']
 APP_ID = config['app_id']
-os.environ['TZ'] = 'Europe/Moscow'
+
 
 """	
 Setup bot intents (events restrictions)
@@ -68,7 +64,6 @@ async def on_ready():
     print(f"Discord.py API version: {discord.__version__}")
     print(f"Python version: {platform.python_version()}")
     print(f"Running on: {platform.system()} {platform.release()} ({os.name})")
-    # print(f"All servers: {bot.guilds}")
     print("-------------------")
     status_task.start()
 
@@ -76,7 +71,7 @@ async def on_ready():
 # Setup the game status task of the bot
 @tasks.loop(minutes=1.0)
 async def status_task():
-    statuses = ["ARAM", f"{config['bot_prefix']}help", "квикосы"]
+    statuses = ["поиск картинок", ""]
     await bot.change_presence(activity=discord.Game(random.choice(statuses)))
 
 
@@ -90,15 +85,6 @@ if __name__ == "__main__":
             except Exception as e:
                 exception = f"{type(e).__name__}: {e}"
                 print(f"Failed to load extension {extension}\n{exception}")
-
-
-# The code in this event is executed every time someone sends a message, with or without the prefix
-@bot.event
-async def on_message(message):
-    # Ignores if a command is being executed by a bot or by the bot itself
-    if message.author == bot.user or message.author.bot:
-        return
-    await bot.process_commands(message)
 
 
 # The code in this event is executed every time someone sends a message, with or without the prefix
@@ -127,5 +113,4 @@ async def on_command_error(context, error):
 
 
 # Run the bot with the token
-
 bot.run(TOKEN)
