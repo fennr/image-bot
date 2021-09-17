@@ -69,7 +69,7 @@ class general(commands.Cog, name="general"):
 
     @tasks.loop(seconds=15.0)
     async def image_task(self):
-        if not yandex.is_good_time(config["time"]):
+        if yandex.is_good_time(config["time"]):
             print(datetime.now())
             channel = None
             for guild in self.bot.guilds:
