@@ -67,7 +67,7 @@ class general(commands.Cog, name="general"):
         else:
             print("Something went wrong. Not sure how though...")
 
-    @tasks.loop(seconds=15.0)
+    @tasks.loop(seconds=60.0)
     async def image_task(self):
         if yandex.is_good_time(config["time"]):
             print(datetime.now())
