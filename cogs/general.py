@@ -77,19 +77,17 @@ class general(commands.Cog, name="general"):
             images = yandex.get_files(config["root"], config["trash"], config["count"])
             count = 0
             for file in images:
-                if count < config["count"]:
-                    if yandex.is_readme(file):
-                        title = yandex.read_file(file)
-                        embed = discord.Embed(title=title, color=config["info"])
-                        if channel is not None:
+                if channel is not None:
+                    if count < config["count"]:
+                        if yandex.is_readme(file):
+                            title = yandex.read_file(file)
+                            embed = discord.Embed(title=title, color=config["info"])
                             await channel.send(embed=embed)
                             yandex.move_to_trash(file)
-                    else:
-                        image = yandex.read_image(file)
-                        embed = discord.Embed(title=clear, color=config["info"])
-                        embed.set_image(url=f'attachment://{file.name}')
-                        if channel is not None:
-                            await channel.send(embed=embed, file=image)
+                        else:
+                            embed = discord.Embed(title=clear, color=config["info"])
+                            embed.set_image(url=file.file)
+                            await channel.send(embed=embed)
                             yandex.move_to_trash(file)
                             count += 1
 

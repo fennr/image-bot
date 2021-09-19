@@ -12,7 +12,6 @@ from discord.ext.commands import Bot
 from discord_slash import SlashCommand, SlashContext  # Importing the newly installed library.
 
 from scripts.config import read_config
-from scripts.test import ya_test
 
 config = read_config()
 
