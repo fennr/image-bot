@@ -77,8 +77,9 @@ class general(commands.Cog, name="general"):
             images = yandex.get_files(config["root"], config["trash"], config["count"])
             count = 0
             for file in images:
+                max_count = len(images) if config["upload"] == 'set' else config["count"]
                 if channel is not None:
-                    if count < config["count"]:
+                    if count < max_count:
                         if yandex.is_readme(file):
                             title = yandex.read_file(file)
                             embed = discord.Embed(title=title, color=config["info"])

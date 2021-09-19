@@ -140,6 +140,8 @@ def get_files(path, trash, max):
         set_path = path + '/' + set.name
         create_trash(trash, set.name)
         set_files = list(y.listdir(set_path))
+        if config['upload'] == 'set':
+            return set_files
         all_files = [*all_files, *set_files]
         if len(all_files) > max:
             return all_files
