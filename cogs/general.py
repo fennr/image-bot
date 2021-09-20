@@ -1,5 +1,7 @@
 import sys
 import yadisk
+import io
+import aiohttp
 import discord
 from discord.ext import commands, tasks
 
@@ -86,9 +88,12 @@ class general(commands.Cog, name="general"):
                             await channel.send(embed=embed)
                             yandex.move_to_trash(file)
                         else:
-                            embed = discord.Embed(title=clear, color=config["info"])
-                            embed.set_image(url=file.file)
-                            await channel.send(embed=embed)
+                            async with aiohttp.ClientSession() as session:
+                                async with session.get(file.file) as resp:
+                                    if resp.status != 200:
+                                        return await channel.send('Could not download file...')
+                                    data = io.BytesIO(await resp.read())
+                                    await channel.send(file=discord.File(data, file.name))
                             yandex.move_to_trash(file)
                             count += 1
 
