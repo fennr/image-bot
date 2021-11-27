@@ -85,17 +85,18 @@ class general(commands.Cog, name="general"):
 
     @tasks.loop(seconds=60.0)
     async def image_task(self):
-        if yandex.is_good_time(config["time"]):
+        if not yandex.is_good_time(config["time"]):
             print(f"Старт публикации : {datetime.now()}")
             channel = None
             try:
                 for guild in self.bot.guilds:
                     channel = discord.utils.get(guild.text_channels, name=config["channel"])
-                    print(f"Поиск канала на сервере {guild}", end='...')
+                    print(f"Поиск канала на сервере {guild}", end=' ...')
                     if channel is None:
                         print("Не найден")
                     else:
                         print("Найден!")
+                        break
                 if channel is None:
                     raise ChannelNotFound(config["channel"])
             except ChannelNotFound as e:
@@ -103,35 +104,31 @@ class general(commands.Cog, name="general"):
 
             images = yandex.get_files(config["root"], config["trash"], config["count"])
             count = 0
-            good = False
-            print(f"Считано файлов из папки : {len(images)}")
-            for file in images:
-                max_count = len(images) if config["upload"] == 'set' else config["count"]
-                if channel is not None:
-                    if count < max_count:
-                        if yandex.is_readme(file):
-                            title = yandex.read_file(file)
-                            embed = discord.Embed(title=title, color=config["info"])
-                            await channel.send(embed=embed)
-                            yandex.move_to_trash(file)
-                            print(f"{count+1} : {file.name} ... Опубликован")
-                            good = True
-                        else:
-                            async with aiohttp.ClientSession() as session:
-                                async with session.get(file.file) as resp:
-                                    if resp.status != 200:
-                                        return await channel.send('Could not download file...')
-                                    data = io.BytesIO(await resp.read())
-                                    await channel.send(file=discord.File(data, file.name))
-                                    good = True
-                            yandex.move_to_trash(file)
-                            print(f"{count+1} : {file.name} ... Опубликован")
-                            count += 1
-
-            if good:
-                print(f"Публикация успешно завершена. \nОбработано {count} файлов. \nКонец публикации : {datetime.now()}")
+            print(f"Считано файлов : {len(images)}")
+            if len(images) > 0:
+                for file in images:
+                    max_count = len(images) if config["upload"] == 'set' else config["count"]
+                    if channel is not None:
+                        if count < max_count:
+                            if yandex.is_readme(file):
+                                title = yandex.read_file(file)
+                                embed = discord.Embed(title=title, color=config["info"])
+                                await channel.send(embed=embed)
+                                yandex.move_to_trash(file)
+                                print(f"{count+1} : {file.name} ...Опубликован")
+                            else:
+                                async with aiohttp.ClientSession() as session:
+                                    async with session.get(file.file) as resp:
+                                        if resp.status != 200:
+                                            return await channel.send('Could not download file...')
+                                        data = io.BytesIO(await resp.read())
+                                        await channel.send(file=discord.File(data, file.name))
+                                yandex.move_to_trash(file)
+                                print(f"{count+1} : {file.name} ...Опубликован")
+                                count += 1
+                print(f"Публикация успешно завершена \nКонец публикации : {datetime.now()}")
             else:
-                print("Публикация не выполнена.")
+                print("Публикация не выполнена. Не считаны изображения")
             print(18 * '-')
 
 
