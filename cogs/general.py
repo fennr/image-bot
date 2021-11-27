@@ -13,6 +13,20 @@ config = config.read_config()
 clear = '\u200b'
 
 
+class Error(Exception):
+    """Базовый класс для других исключений"""
+
+    def __init__(self, message="Публикация не выполнена"):
+        self.message = message
+        # переопределяется конструктор встроенного класса `Exception()`
+        super().__init__(self.message)
+
+class ChannelNotFound(Error):
+    def __init__(self, channel, message="Не найден канал"):
+        self.channel = channel
+        self.message = message + ' ' + channel
+        super().__init__(self.message)
+
 class general(commands.Cog, name="general"):
     def __init__(self, bot):
         self.bot = bot
@@ -24,7 +38,7 @@ class general(commands.Cog, name="general"):
         - Проверка жив ли бот
         """
         embed = discord.Embed(
-            color=config["success"]
+            color=config["info"]
         )
         embed.add_field(
             name="Pong!",
@@ -74,8 +88,19 @@ class general(commands.Cog, name="general"):
         if yandex.is_good_time(config["time"]):
             print(f"Старт публикации : {datetime.now()}")
             channel = None
-            for guild in self.bot.guilds:
-                channel = discord.utils.get(guild.text_channels, name=config["channel"])
+            try:
+                for guild in self.bot.guilds:
+                    channel = discord.utils.get(guild.text_channels, name=config["channel"])
+                    print(f"Поиск канала на сервере {guild}", end='...')
+                    if channel is None:
+                        print("Не найден")
+                    else:
+                        print("Найден!")
+                if channel is None:
+                    raise ChannelNotFound(config["channel"])
+            except ChannelNotFound as e:
+                print(f"Ошибка! {e}")
+
             images = yandex.get_files(config["root"], config["trash"], config["count"])
             count = 0
             good = False
@@ -89,7 +114,7 @@ class general(commands.Cog, name="general"):
                             embed = discord.Embed(title=title, color=config["info"])
                             await channel.send(embed=embed)
                             yandex.move_to_trash(file)
-                            print(f"{count+1} : {file.filename}")
+                            print(f"{count+1} : {file.name} ... Опубликован")
                             good = True
                         else:
                             async with aiohttp.ClientSession() as session:
@@ -100,12 +125,13 @@ class general(commands.Cog, name="general"):
                                     await channel.send(file=discord.File(data, file.name))
                                     good = True
                             yandex.move_to_trash(file)
-                            print(f"{count+1} : {file.name}")
+                            print(f"{count+1} : {file.name} ... Опубликован")
                             count += 1
+
             if good:
                 print(f"Публикация успешно завершена. \nОбработано {count} файлов. \nКонец публикации : {datetime.now()}")
             else:
-                print("Публикация не выполнена. Не найдены файлы в папке")
+                print("Публикация не выполнена.")
             print(18 * '-')
 
 
