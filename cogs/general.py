@@ -72,12 +72,13 @@ class general(commands.Cog, name="general"):
     @tasks.loop(seconds=60.0)
     async def image_task(self):
         if yandex.is_good_time(config["time"]):
-            print(datetime.now())
+            print(f"Старт публикации : {datetime.now()}")
             channel = None
             for guild in self.bot.guilds:
                 channel = discord.utils.get(guild.text_channels, name=config["channel"])
             images = yandex.get_files(config["root"], config["trash"], config["count"])
             count = 0
+            good = False
             for file in images:
                 max_count = len(images) if config["upload"] == 'set' else config["count"]
                 if channel is not None:
@@ -87,6 +88,8 @@ class general(commands.Cog, name="general"):
                             embed = discord.Embed(title=title, color=config["info"])
                             await channel.send(embed=embed)
                             yandex.move_to_trash(file)
+                            print(f"{count+1} : {file.filename}")
+                            good = True
                         else:
                             async with aiohttp.ClientSession() as session:
                                 async with session.get(file.file) as resp:
@@ -94,8 +97,16 @@ class general(commands.Cog, name="general"):
                                         return await channel.send('Could not download file...')
                                     data = io.BytesIO(await resp.read())
                                     await channel.send(file=discord.File(data, file.name))
+                                    good = True
                             yandex.move_to_trash(file)
+                            print(f"{count+1} : {file.name}")
                             count += 1
+            if good:
+                print(f"Публикация успешно завершена. \nОбработано {count} файлов. \nКонец публикации : {datetime.now()}")
+            else:
+                print("Публикация не выполнена")
+            print(18 * '-')
+
 
 
 def setup(bot):
