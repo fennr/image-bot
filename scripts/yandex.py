@@ -141,9 +141,11 @@ def get_files(path, trash, max):
         create_trash(trash, set.name)
         set_files = list(y.listdir(set_path))
         if config['upload'] == 'set' and len(set_files) > 0:
+            print(f'Папка публикации : {set.name}\nАдрес папки : {set_path}')
             return set_files
         all_files = [*all_files, *set_files]
         if len(all_files) > max and config['upload'] != 'set':
+            print(f'Папка публикации : {set.name}\nАдрес папки : {set_path}')
             return all_files
     return all_files
 
