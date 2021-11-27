@@ -85,7 +85,7 @@ class general(commands.Cog, name="general"):
 
     @tasks.loop(seconds=60.0)
     async def image_task(self):
-        if not yandex.is_good_time(config["time"]):
+        if yandex.is_good_time(config["time"]):
             print(f"Старт публикации : {datetime.now()}")
             channel = None
             try:
