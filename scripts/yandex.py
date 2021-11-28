@@ -136,6 +136,7 @@ def get_files(path, trash, max):
     """
     root = list(y.listdir(path))
     all_files = []
+    print("Поиск папок...")
     for set in root:
         set_path = path + '/' + set.name
         create_trash(trash, set.name)

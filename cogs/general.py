@@ -9,6 +9,8 @@ from datetime import datetime
 from scripts import config
 from scripts import yandex
 
+from pprint import pprint
+
 config = config.read_config()
 clear = '\u200b'
 
@@ -83,9 +85,9 @@ class general(commands.Cog, name="general"):
         else:
             print("Something went wrong. Not sure how though...")
 
-    @tasks.loop(seconds=60.0)
+    @tasks.loop(seconds=20.0)
     async def image_task(self):
-        if yandex.is_good_time(config["time"]):
+        if not yandex.is_good_time(config["time"]):
             print(f"Старт публикации : {datetime.now()}")
             channel = None
             try:
@@ -103,6 +105,7 @@ class general(commands.Cog, name="general"):
                 print(f"Ошибка! {e}")
 
             images = yandex.get_files(config["root"], config["trash"], config["count"])
+
             count = 0
             print(f"Считано файлов : {len(images)}")
             if len(images) > 0:
@@ -117,12 +120,15 @@ class general(commands.Cog, name="general"):
                                 yandex.move_to_trash(file)
                                 print(f"{count+1} : {file.name} ...Опубликован")
                             else:
-                                async with aiohttp.ClientSession() as session:
-                                    async with session.get(file.file) as resp:
-                                        if resp.status != 200:
-                                            return await channel.send('Could not download file...')
-                                        data = io.BytesIO(await resp.read())
-                                        await channel.send(file=discord.File(data, file.name))
+                                if config["download_type"] == "file":
+                                    async with aiohttp.ClientSession() as session:
+                                        async with session.get(file.file) as resp:
+                                            if resp.status != 200:
+                                                return await channel.send('Could not download file...')
+                                            data = io.BytesIO(await resp.read())
+                                            await channel.send(file=discord.File(data, file.name))
+                                else:
+                                    await channel.send(file.file)
                                 yandex.move_to_trash(file)
                                 print(f"{count+1} : {file.name} ...Опубликован")
                                 count += 1
